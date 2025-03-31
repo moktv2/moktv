@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>لعبة العيد 🎉</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+
+    :root {
+      --primary-color: #8bc34a;
+      --secondary-color: #4caf50;
+      --accent-color: #ffeb3b;
+      --text-color: #3e2723;
+      --dark-color: #263238;
+      --light-color: #f9f9f9;
+      --gift-color: #e91e63;
+    }
+
+    body {
+      text-align: center;
+      font-family: 'Tajawal', Arial, sans-serif;
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #5c9f44, #2e7d32);
+      background-size: cover;
+      color: var(--light-color);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url('/api/placeholder/800/600');
+      background-size: cover;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    /* تأثيرات الزينة */
+    .lantern {
+      position: absolute;
+      width: 20px;
+      height: 30px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      box-shadow: 0 0 20px var(--accent-color);
+      animation: float 3s infinite ease-in-out;
+      z-index: -1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.1); }
+    }
+
+    h1 {
+      font-size: 48px;
+      color: var(--accent-color);
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+      animation: pulse 2s infinite;
+      font-weight: bold;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    canvas {
+      background: rgba(255, 255, 255, 0.15);
+      border: 3px solid var(--accent-color);
+      box-shadow: 0 0 20px rgba(255, 235, 59, 0.5);
+      border-radius: 10px;
+      touch-action: none; /* منع التكبير على اللمس */
+    }
+
+    #formContainer,
+    #codeContainer,
+    #controls,
+    #leaderboard,
+    #playedMessage,
+    #giftPopup,
+    #gameOverPopup {
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    #giftPopup, #gameOverPopup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 30px;
+      border: 3px solid var(--gift-color);
+      text-align: center;
+    }
+    
+    #gameOverPopup {
+      border-color: var(--accent-color);
+    }
+
+    #gameOverPopup h2 {
+      color: var(--accent-color);
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+
+    #gameOverPopup .final-score {
+      font-size: 28px;
+      color: var(--accent-color);
+      margin-bottom: 20px;
+    }
+
+    #giftPopup img {
+      max-width: 100%;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+
+    #giftPopup h2 {
+      color: var(--accent-color);
+      margin-bottom: 15px;
+    }
+
+    #playedMessage {
+      background-color: rgba(244, 67, 54, 0.2);
+      border-color: #f44336;
+    }
+
+    label {
+      font-size: 18px;
+      color: var(--light-color);
+      margin-right: 10px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 5px;
+      border: 2px solid var(--accent-color);
+      font-family: 'Tajawal', Arial, sans-serif;
+      font-size: 16px;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    button {
+      font-size: 20px;
+      padding: 12px 20px;
+      margin: 8px;
+      background: linear-gradient(135deg, var(--accent-color), #ffc107);
+      border: none;
+      border-radius: 10px;
+      color: var(--dark-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Tajawal', Arial, sans-serif;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      background: #95a5a6;
+      transform: none;
+      box-shadow: none;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    #startBtn, #verifyCodeBtn {
+      background: linear-gradient(135deg, #4caf50, #2e7d32);
+      color: white;
+      padding: 12px 30px;
+      font-size: 22px;
+    }
+
+    #leftBtn,
+    #rightBtn {
+      font-size: 30px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      width: 60px;
+      height: 60px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    #shareBtn {
+      background: linear-gradient(135deg, #1da1f2, #0077b5);
+      color: white;
+    }
+
+    #dismissBtn, #playAgainBtn {
+      background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+      color: white;
+    }
+
+    #leaderboard {
+      font-size: 18px;
+      margin-top: 20px;
+      display: block;
+      color: var(--light-color);
+    }
+
+    #leaderboard h2 {
+      color: var(--accent-color);
+      margin-top: 0;
+      font-size: 24px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .score-board-item {
+      margin: 10px;
+      font-size: 18px;
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .score-board-item:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(-5px);
+    }
+
+    /* زخارف العيد */
+    #eidDecorations {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .crescent {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      box-shadow: 15px 0 0 0 var(--accent-color);
+      transform: rotate(-45deg);
+      opacity: 0.7;
+    }
+
+    .star {
+      position: absolute;
+      background-color: var(--accent-color);
+      opacity: 0.7;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+
+    .player-score {
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+
+    .error-message {
+      color: #ff5252;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    
+    #gameInfo {
+      margin-top: 10px;
+      color: #ffeb3b;
+      font-weight: bold;
+    }
+    
+    #instructionsContainer {
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #instructionsContainer h2 {
+      color: var(--accent-color);
+      margin-top: 0;
+      font-size: 28px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .instructions-content {
+      text-align: right;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .instructions-content ul {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .instructions-content li {
+      margin-bottom: 8px;
+    }
+
+    #continueBtn {
+      font-size: 20px;
+      padding: 12px 20px;
+      margin-top: 15px;
+      background: linear-gradient(135deg, var(--accent-color), #ffc107);
+      border: none;
+      border-radius: 10px;
+      color: var(--dark-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Tajawal', Arial, sans-serif;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #continueBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* إضافة تأثيرات الميزة الجديدة */
+    .powerup-text {
+      position: absolute;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      animation: fadeUp 2s forwards;
+      user-select: none;
+    }
+
+    @keyframes fadeUp {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-50px); }
+    }
+
+    /* تأثير التجميد */
+    .frozen {
+      opacity: 0.7;
+      box-shadow: 0 0 20px #03a9f4;
+      border: 3px solid #03a9f4;
+    }
+    
+    /* تأثير المضاعفة */
+    .double-score {
+      border: 3px solid #e91e63;
+      box-shadow: 0 0 20px #e91e63;
+    }
+    
+    /* مؤشر الميزات النشطة */
+    #activeEffects {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 5px;
+      border-radius: 5px;
+    }
+    
+    .effect-icon {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin: 2px;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .freeze-icon {
+      background-color: #03a9f4;
+    }
+    
+    .double-icon {
+      background-color: #e91e63;
+    }
+    
+    /* تأثير الانفجار */
+    .explosion {
+      position: absolute;
+      pointer-events: none;
+      animation: explode 0.5s forwards;
+    }
+    
+    @keyframes explode {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    
+    /* شريط تقدم اللعبة */
+    #progressBar {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 200px;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    #progress {
+      height: 100%;
+      background: linear-gradient(to right, #f44336, #ffeb3b, #4caf50);
+      width: 100%;
+      border-radius: 10px;
+      transition: width 0.5s linear;
+    }
+    
+    /* تأثير النجوم */
+    .star-effect {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #ffeb3b;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: twinkle 1s infinite alternate;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+    
+    /* تأثير الزخارف الدوارة */
+    .rotating-decoration {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255, 235, 59, 0.2);
+      border: 2px dashed #ffeb3b;
+      pointer-events: none;
+      animation: rotate 5s linear infinite;
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <!-- زينة العيد -->
+  <div id="eidDecorations">
+    <div class="crescent"></div>
+  </div>
+
+  <h1>🌙  لعبة عيدنا  🎉</h1>
+  
+  <!-- حاوية كود الدخول -->
+  <div id="codeContainer">
+    <label for="accessCode">أدخل رمز الدخول:</label>
+    <input type="text" id="accessCode" placeholder="رمز الدخول" />
+    <button id="verifyCodeBtn">تحقق</button>
+    <div id="codeError" class="error-message" style="display:none;">رمز الدخول غير صحيح، الرجاء المحاولة مرة أخرى</div>
+  </div>
+  
+  <!-- رسالة للاعبين الذين لعبوا مسبقاً -->
+  <div id="playedMessage" style="display:none;">
+    <h2>لقد لعبت هذه اللعبة مسبقاً! 🎮</h2>
+    <p>نتيجتك السابقة: <span id="previousScore" class="player-score">0</span> ريال</p>
+    <div id="gameInfo">عدد مرات اللعب المتبقية: <span id="remainingPlays">0</span></div>
+    <button id="playAgainBtn" style="display:none;">العب مرة أخرى</button>
+  </div>
+  
+  <div id="instructionsContainer" style="display:none;">
+    <h2>كيفية اللعب</h2>
+    <div class="instructions-content">
+      <p>🎮 مرحبًا بك في لعبة عيدنا!</p>
+      <p>🎯 <strong>الهدف:</strong> جمع أكبر عدد من العملات للفوز بأعلى نتيجة</p>
+      <p>📱 <strong>طريقة اللعب:</strong></p>
+      <ul style="list-style-type: none; padding: 0;">
+        <li>⬅️ ➡️ استخدم الأزرار أو مفاتيح الأسهم لتحريك السلة</li>
+        <li>💰 التقط العملات الصفراء لزيادة نقاطك</li>
+        <li>🎁 التقط الهدايا الخاصة للحصول على مفاجآت</li>
+        <li>🔵 مجمد: يجمد اللاعب لمدة 5 ثوانٍ</li>
+        <li>🔴 مضاعف: يضاعف قيمة العملات لمدة 8 ثوانٍ</li>
+        <li>🎫 هدية ViU: فرصة للفوز باشتراك</li>
+        <li>⭐ الهدية الذهبية: تضيف نقاط إضافية!</li>
+        <li>❌ تجنب العناصر الحمراء فهي تخصم من نقاطك</li>
+        <li>⏱️ لديك 15 ثانية فقط لجمع أكبر قدر من العملات</li>
+        <li>🔄 يمكنك التحرك 50 مرة فقط في كل لعبة</li>
+      </ul>
+      <button id="continueBtn">استمر للعب</button>
+    </div>
+  </div>
+
+  <!-- نافذة هدية ViU -->
+  <div id="giftPopup" style="display:none;">
+    <h2>🎁 مبروك! لقد فزت بهدية ViU 🎁</h2>
+    <img src="/api/placeholder/300/200" alt="هدية ViU" />
+    <p>لقد فزت باشتراك مجاني لمدة شهر في خدمة ViU!</p>
+    <p>لاستلام هديتك، التقط صورة لهذه الشاشة وشاركها على تويتر مع الوسم <strong>#عيدنا_مع_ViU</strong></p>
+    <p>كود الهدية: <strong id="giftCode">VIU-XXXX-XXXX</strong></p>
+    <button id="shareBtn">مشاركة على تويتر</button>
+    <button id="dismissBtn">إغلاق</button>
+  </div>
+  
+  <!-- نافذة نهاية اللعبة -->
+  <div id="gameOverPopup" style="display:none;">
+    <h2>🎮 انتهت اللعبة! 🎮</h2>
+    <div class="final-score">نتيجتك: <span id="finalScore">0</span> ريال</div>
+    <p id="gameOverMessage"></p>
+    <button id="playAgainGameOverBtn">العب مرة أخرى</button>
+    <button id="closeGameOverBtn">إغلاق</button>
+  </div>
+
+  <div id="formContainer" style="display:none;">
+    <label for="playerName">أدخل اسمك:</label>
+    <input type="text" id="playerName" />
+    <button id="startBtn">ابدأ اللعبة</button>
+  </div>
+
+  <div id="leaderboard">
+    <h2>🏆 لوحة الصدارة</h2>
+    <div id="leaderboardList"></div>
+  </div>
+
+  <canvas id="gameCanvas" style="display:none;"></canvas>
+  
+  <!-- شريط تقدم اللعبة -->
+  <div id="progressBar" style="display:none;">
+    <div id="progress"></div>
+  </div>
+  
+  <!-- مؤشر الميزات النشطة -->
+  <div id="activeEffects" style="display:none;"></div>
+
+  <div id="controls" style="display:none;">
+    <button id="rightBtn">➡️</button>
+    <button id="leftBtn">⬅️</button>
+  </div>
+
+  <script>
+    // إعداد Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCh_E8_PAjV4nakaDGj9cLO98CM3RFExes",
+      authDomain: "fire-db-1-d624b.firebaseapp.com",
+      databaseURL: "https://fire-db-1-d624b-default-rtdb.firebaseio.com",
+      projectId: "fire-db-1-d624b",
+      storageBucket: "fire-db-1-d624b.appspot.com",
+      messagingSenderId: "780314614680",
+      appId: "1:780314614680:web:44a731afe8e35c9b6669ed",
+      measurementId: "G-LEP06Q8VLM"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // متغيرات اللعبة
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const playerNameInput = document.getElementById('playerName');
+    const formContainer = document.getElementById('formContainer');
+    const codeContainer = document.getElementById('codeContainer');
+    const accessCodeInput = document.getElementById('accessCode');
+    const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+    const codeError = document.getElementById('codeError');
+    const controls = document.getElementById('controls');
+    const leftBtn = document.getElementById('leftBtn');
+    const rightBtn = document.getElementById('rightBtn');
+    const leaderboard = document.getElementById('leaderboard');
+    const leaderboardList = document.getElementById('leaderboardList');
+    const eidDecorations = document.getElementById('eidDecorations');
+    const playedMessage = document.getElementById('playedMessage');
+    const previousScore = document.getElementById('previousScore');
+    const remainingPlays = document.getElementById('remainingPlays');
+    const instructionsContainer = document.getElementById('instructionsContainer');
+    const continueBtn = document.getElementById('continueBtn');
+    const giftPopup = document.getElementById('giftPopup');
+    const shareBtn = document.getElementById('shareBtn');
+    const dismissBtn = document.getElementById('dismissBtn');
+    const giftCode = document.getElementById('giftCode');
+    const activeEffects = document.getElementById('activeEffects');
+    const progressBar = document.getElementById('progressBar');
+    const progress = document.getElementById('progress');
+    const gameOverPopup = document.getElementById('gameOverPopup');
+    const finalScore = document.getElementById('finalScore');
+    const gameOverMessage = document.getElementById('gameOverMessage');
+    const playAgainGameOverBtn = document.getElementById('playAgainGameOverBtn');
+    const closeGameOverBtn = document.getElementById('closeGameOverBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+
+    // الكود المطلوب للدخول
+    const REQUIRED_CODE = "eid2";
+    
+    // العدد الأقصى للعب
+    const MAX_PLAYS = 4;
+
+    let playerName = "";
+    let playCount = 0;
+    let basket = { x: 0, y: 0, width: 0, height: 0 };
+    let movesLeft = 50;
+    let coins = [];
+    let score = 0;
+    let gameStarted = false;
+    let gameStartTime = 0;
+    const gameDuration = 15000;
+    let coinInterval;
+    let losePoints = [];
+    let userUniqueId = null;
+    let gameLoop;
+    let achievements = [];
+    
+    // الميزات الجديدة
+    let powerups = [];
+    let gifts = [];
+    let specialGifts = [];
+    let isFrozen = false;
+    let frozenEndTime = 0;
+    let isDoubleScore = false;
+    let doubleScoreEndTime = 0;
+    let viuGiftFound = false;
+    let comboCount = 0;
+    let lastCoinTime = 0;
+    const COMBO_TIMEOUT = 1000; // زمن مؤقت المجموعة (بالمللي ثانية)
+
+    // زخارف إضافية
+    let rotatingDecorations = [];
+    let lastStarTime = 0;
+    const STAR_INTERVAL = 200; // زمن توليد النجوم (بالمللي ثانية)
+
+    // أنواع الميزات
+    const POWERUP_TYPES = {
+      FREEZE: 'freeze',
+      DOUBLE_SCORE: 'double',
+      VIU_GIFT: 'viu',
+      GOLDEN_GIFT: 'golden'
+    };
+    
+    // إنجازات اللعبة
+    const ACHIEVEMENTS = {
+      COIN_COLLECTOR: 'جامع العملات',
+      COMBO_MASTER: 'سيد المجموعات',
+      POWERUP_HUNTER: 'صياد الميزات',
+      SPEED_DEMON: 'الوحش السريع',
+      GOLDEN_FINDER: 'باحث الذهب'
+    };
+
+    // دالة مساعدة لإظهار/إخفاء العناصر بشكل منظم
+    function showScreen(screenId) {
+      // إخفاء جميع الشاشات أولاً
+      const screens = [formContainer, instructionsContainer, playedMessage, codeContainer, canvas, controls, activeEffects, progressBar, gameOverPopup];
+      screens.forEach(screen => {
+        if (screen) screen.style.display = 'none';
+      });
+      
+      // عرض الشاشة المطلوبة فقط
+      if (screenId) screenId.style.display = 'block';
+      
+      // لوحة الصدارة تظهر دائمًا إلا عند اللعب
+      leaderboard.style.display = (screenId === canvas) ? 'none' : 'block';
+      
+      // إظهار مؤشر الميزات وشريط التقدم عند اللعب فقط
+      if (screenId === canvas) {
+        activeEffects.style.display = 'block';
+        progressBar.style.display = 'block';
+      }
+    }
+
+    // التحقق من رمز الدخول
+    verifyCodeBtn.addEventListener('click', () => {
+      const code = accessCodeInput.value.trim().toLowerCase();
+      if (code === REQUIRED_CODE) {
+        showScreen(null);
+        
+        // إنشاء معرف فريد للمستخدم إذا لم يكن موجوداً
+        userUniqueId = localStorage.getItem('eidGame_userId');
+        if (!userUniqueId) {
+          userUniqueId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('eidGame_userId', userUniqueId);
+        }
+        
+        // التحقق من عدد مرات اللعب للمستخدم
+        checkPlayCount();
+        
+        // تحديث لوحة الصدارة
+        showLeaderboard();
+      } else {
+        codeError.style.display = 'block';
+        setTimeout(() => {
+          codeError.style.display = 'none';
+        }, 3000);
+      }
+    });
+
+  // التحقق من عدد مرات اللعب للمستخدم
+    function checkPlayCount() {
+      const userRef = database.ref('players/' + userUniqueId);
+      userRef.once('value').then((snapshot) => {
+        const userData = snapshot.val();
+        if (userData) {
+          playerName = userData.name || '';
+          playCount = userData.playCount || 0;
+          
+          // عرض الرسالة للاعب الذي لعب مسبقًا
+          if (playCount > 0) {
+            previousScore.textContent = userData.score || '0';
+            const remaining = MAX_PLAYS - playCount;
+            remainingPlays.textContent = remaining;
+            playedMessage.style.display = 'block';
+            
+            // إذا كان لديه محاولات متبقية، إظهار زر اللعب مرة أخرى
+            if (remaining > 0) {
+              playAgainBtn.style.display = 'block';
+            } else {
+              playAgainBtn.style.display = 'none';
+            }
+          } else {
+            // إذا كان أول لعبة، عرض نموذج الاسم
+            showScreen(formContainer);
+          }
+        } else {
+          // مستخدم جديد
+          showScreen(formContainer);
+        }
+      });
+    }
+
+    // إظهار لوحة الصدارة
+    function showLeaderboard() {
+      const leaderboardRef = database.ref('leaderboard').orderByChild('score').limitToLast(10);
+      leaderboardRef.once('value').then((snapshot) => {
+        const data = snapshot.val();
+        leaderboardList.innerHTML = '';
+        
+        if (data) {
+          // تحويل البيانات إلى مصفوفة وترتيبها تنازليًا
+          const scores = Object.values(data).sort((a, b) => b.score - a.score);
+          
+          scores.forEach((player, index) => {
+            const scoreItem = document.createElement('div');
+            scoreItem.className = 'score-board-item';
+            scoreItem.innerHTML = `#${index + 1} ${player.name}: <span class="player-score">${player.score}</span> ريال`;
+            leaderboardList.appendChild(scoreItem);
+          });
+        } else {
+          leaderboardList.innerHTML = '<div class="score-board-item">لا توجد نتائج بعد</div>';
+        }
+      });
+    }
+
+    // بدء اللعبة
+    startBtn.addEventListener('click', () => {
+      playerName = playerNameInput.value.trim();
+      if (playerName) {
+        showScreen(instructionsContainer);
+      } else {
+        alert('الرجاء إدخال اسمك');
+      }
+    });
+    
+    // زر اللعب مرة أخرى
+    playAgainBtn.addEventListener('click', () => {
+      showScreen(instructionsContainer);
+    });
+    
+    // زر الاستمرار للعب
+    continueBtn.addEventListener('click', () => {
+      initializeGame();
+    });
+    
+    // إغلاق نافذة الهدية
+    dismissBtn.addEventListener('click', () => {
+      giftPopup.style.display = 'none';
+    });
+    
+    // مشاركة على تويتر
+    shareBtn.addEventListener('click', () => {
+      const tweetText = `مبروك! لقد فزت باشتراك مجاني في خدمة ViU! كود الهدية: ${giftCode.textContent} #عيدنا_مع_ViU`;
+      const tweetURL = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+      window.open(tweetURL, '_blank');
+    });
+    
+    // أزرار نافذة نهاية اللعبة
+    playAgainGameOverBtn.addEventListener('click', () => {
+      gameOverPopup.style.display = 'none';
+      initializeGame();
+    });
+    
+    closeGameOverBtn.addEventListener('click', () => {
+      gameOverPopup.style.display = 'none';
+      showScreen(null);
+      checkPlayCount();
+    });
+
+    // تهيئة اللعبة
+    function initializeGame() {
+      // إعادة ضبط متغيرات اللعبة
+      gameStarted = true;
+      gameStartTime = Date.now();
+      score = 0;
+      coins = [];
+      losePoints = [];
+      powerups = [];
+      gifts = [];
+      specialGifts = [];
+      isFrozen = false;
+      isDoubleScore = false;
+      viuGiftFound = false;
+      comboCount = 0;
+      achievements = [];
+      movesLeft = 50;
+      rotatingDecorations = [];
+      
+      // إظهار شاشة اللعبة
+      showScreen(canvas);
+      
+      // تعيين حجم اللعبة
+      resetGameSize();
+      
+      // بدء إنتاج العملات
+      clearInterval(coinInterval);
+      coinInterval = setInterval(createCoin, 800);
+      
+      // بدء حلقة اللعبة
+      cancelAnimationFrame(gameLoop);
+      gameLoop = requestAnimationFrame(updateGame);
+      
+      // إضافة زخارف دوارة
+      for (let i = 0; i < 5; i++) {
+        rotatingDecorations.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          size: 20 + Math.random() * 30
+        });
+      }
+      
+      // إنشاء السلة
+      basket = {
+        x: canvas.width / 2 - 50,
+        y: canvas.height - 60,
+        width: 100,
+        height: 30
+      };
+      
+      // تحديث شريط التقدم
+      updateProgressBar();
+      
+      // تحديث مؤشر الميزات النشطة
+      updateActiveEffects();
+    }
+
+    // إعادة ضبط حجم اللعبة
+    function resetGameSize() {
+      // تعيين حجم الكانفاس بناءً على حجم الشاشة
+      const maxWidth = Math.min(window.innerWidth - 40, 600);
+      const maxHeight = Math.min(window.innerHeight - 200, 500);
+      
+      canvas.width = maxWidth;
+      canvas.height = maxHeight;
+    }
+
+    // إنشاء عملة جديدة
+    function createCoin() {
+      if (!gameStarted) return;
+      
+      const coinSize = 30;
+      const coinValue = Math.floor(Math.random() * 10) + 1;
+      
+      // إنشاء عملة جديدة
+      const coin = {
+        x: Math.random() * (canvas.width - coinSize),
+        y: -coinSize,
+        size: coinSize,
+        value: coinValue,
+        speed: 2 + Math.random() * 3
+      };
+      
+      coins.push(coin);
+      
+      // فرصة إنشاء نقطة خسارة
+      if (Math.random() < 0.2) {
+        const losePoint = {
+          x: Math.random() * (canvas.width - coinSize),
+          y: -coinSize,
+          size: coinSize,
+          value: Math.floor(Math.random() * 5) + 3,
+          speed: 2 + Math.random() * 3
+        };
+        losePoints.push(losePoint);
+      }
+      
+      // فرصة إنشاء ميزة
+      if (Math.random() < 0.1) {
+        const powerupTypes = Object.values(POWERUP_TYPES);
+        const powerupType = powerupTypes[Math.floor(Math.random() * (powerupTypes.length - 1))]; // استبعاد هدية ViU
+        
+        const powerup = {
+          x: Math.random() * (canvas.width - coinSize),
+          y: -coinSize,
+          size: coinSize,
+          type: powerupType,
+          speed: 2 + Math.random() * 2
+        };
+        
+        powerups.push(powerup);
+      }
+      
+      // فرصة إنشاء هدية ViU (مرة واحدة فقط في اللعبة)
+      if (!viuGiftFound && Math.random() < 0.05) {
+        const viuGift = {
+          x: Math.random() * (canvas.width - coinSize),
+          y: -coinSize,
+          size: coinSize,
+          type: POWERUP_TYPES.VIU_GIFT,
+          speed: 1 + Math.random() * 1.5
+        };
+        
+        specialGifts.push(viuGift);
+      }
+    }
+
+    // تحديث اللعبة
+    function updateGame() {
+      if (!gameStarted) return;
+      
+      // التحقق من انتهاء اللعبة
+      const currentTime = Date.now();
+      const elapsedTime = currentTime - gameStartTime;
+      
+      if (elapsedTime >= gameDuration || movesLeft <= 0) {
+        endGame();
+        return;
+      }
+      
+      // تحديث الشاشة
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // تحديث شريط التقدم
+      updateProgressBar(elapsedTime);
+      
+      // تحديث النجوم
+      updateStars(currentTime);
+      
+      // تحديث الزخارف الدوارة
+      drawRotatingDecorations();
+      
+      // تحديث السلة
+      updateBasket();
+      
+      // تحديث العملات
+      updateCoins();
+      
+      // تحديث نقاط الخسارة
+      updateLosePoints();
+      
+      // تحديث الميزات
+      updatePowerups();
+      
+      // تحديث الهدايا الخاصة
+      updateSpecialGifts();
+      
+      // تحديث مؤشر الميزات النشطة
+      updateActiveEffects();
+      
+      // رسم الدرجة
+      drawScore();
+      
+      // رسم الحركات المتبقية
+      drawMovesLeft();
+      
+      // استدعاء التحديث التالي
+      gameLoop = requestAnimationFrame(updateGame);
+    }
+    
+    // إنهاء اللعبة
+    function endGame() {
+      gameStarted = false;
+      clearInterval(coinInterval);
+      cancelAnimationFrame(gameLoop);
+      
+      // تحديث عدد مرات اللعب
+      playCount++;
+      
+      // حفظ نتيجة اللاعب
+      savePlayerScore();
+      
+      // عرض نافذة نهاية اللعبة
+      showGameOverPopup();
+    }
+    
+    // عرض نافذة نهاية اللعبة
+    function showGameOverPopup() {
+      finalScore.textContent = score;
+      
+      // إنشاء رسالة نهاية اللعبة
+      let message = "";
+      
+      if (score > 500) {
+        message = "ممتاز! أنت لاعب محترف 🏆";
+      } else if (score > 300) {
+        message = "جيد جداً! أداء رائع 🌟";
+      } else if (score > 100) {
+        message = "جيد! يمكنك تحسين أدائك 👍";
+      } else {
+        message = "حاول مرة أخرى للحصول على نتيجة أفضل 😊";
+      }
+      
+      // إضافة الإنجازات إلى الرسالة
+      if (achievements.length > 0) {
+        message += "<br><br>الإنجازات التي حققتها:<br>";
+        achievements.forEach(achievement => {
+          message += `- ${achievement}<br>`;
+        });
+      }
+      
+      gameOverMessage.innerHTML = message;
+      
+      // عرض زر اللعب مرة أخرى إذا كان لديه محاولات متبقية
+      const remaining = MAX_PLAYS - playCount;
+      if (remaining > 0) {
+        playAgainGameOverBtn.style.display = 'inline-block';
+      } else {
+        playAgainGameOverBtn.style.display = 'none';
+      }
+      
+      gameOverPopup.style.display = 'block';
+    }
+    
+    // حفظ نتيجة اللاعب
+    function savePlayerScore() {
+      if (userUniqueId && playerName) {
+        // تحديث بيانات اللاعب
+        const playerRef = database.ref('players/' + userUniqueId);
+        playerRef.update({
+          name: playerName,
+          score: Math.max(score, Number(previousScore.textContent) || 0),
+          playCount: playCount,
+          lastPlayed: Date.now()
+        });
+        
+        // تحديث لوحة الصدارة
+        const leaderboardRef = database.ref('leaderboard/' + userUniqueId);
+        leaderboardRef.update({
+          name: playerName,
+          score: Math.max(score, Number(previousScore.textContent) || 0),
+          lastPlayed: Date.now()
+        });
+      }
+    }
+
+    // تحديث شريط التقدم
+    function updateProgressBar(elapsedTime) {
+      if (!elapsedTime) {
+        progress.style.width = '100%';
+        return;
+      }
+      
+      const remaining = Math.max(0, (gameDuration - elapsedTime) / gameDuration);
+      progress.style.width = `${remaining * 100}%`;
+    }
+    
+    // تحديث النجوم
+    function updateStars(currentTime) {
+      if (currentTime - lastStarTime > STAR_INTERVAL) {
+        const star = document.createElement('div');
+        star.className = 'star-effect';
+        star.style.left = `${Math.random() * window.innerWidth}px`;
+        star.style.top = `${Math.random() * window.innerHeight}px`;
+        document.body.appendChild(star);
+        
+        // إزالة النجمة بعد فترة
+        setTimeout(() => {
+          star.remove();
+        }, 2000);
+        
+        lastStarTime = currentTime;
+      }
+    }
+    
+    // رسم الزخارف الدوارة
+    function drawRotatingDecorations() {
+      rotatingDecorations.forEach((decoration) => {
+        const decorElement = document.createElement('div');
+        decorElement.className = 'rotating-decoration';
+        decorElement.style.left = `${decoration.x}px`;
+        decorElement.style.top = `${decoration.y}px`;
+        decorElement.style.width = `${decoration.size}px`;
+        decorElement.style.height = `${decoration.size}px`;
+        eidDecorations.appendChild(decorElement);
+        
+        // إزالة الزخرفة بعد فترة
+        setTimeout(() => {
+          decorElement.remove();
+        }, 5000);
+      });
+    }
+
+    // تحديث السلة
+    function updateBasket() {
+      // تطبيق تأثير التجميد على السلة
+      if (isFrozen && Date.now() < frozenEndTime) {
+        ctx.fillStyle = '#03a9f4';
+        ctx.shadowColor = '#03a9f4';
+        ctx.shadowBlur = 10;
+      } else {
+        ctx.fillStyle = '#f9f9f9';
+        ctx.shadowColor = '#ffeb3b';
+        ctx.shadowBlur = 5;
+        isFrozen = false;
+      }
+      
+      // تطبيق تأثير المضاعفة على السلة
+      if (isDoubleScore && Date.now() < doubleScoreEndTime) {
+        ctx.strokeStyle = '#e91e63';
+        ctx.lineWidth = 3;
+      } else {
+        ctx.strokeStyle = '#ffeb3b';
+        ctx.lineWidth = 2;
+        isDoubleScore = false;
+      }
+      
+      // رسم السلة
+      ctx.beginPath();
+      ctx.moveTo(basket.x, basket.y);
+      ctx.lineTo(basket.x + basket.width, basket.y);
+      ctx.lineTo(basket.x + basket.width - 10, basket.y + basket.height);
+      ctx.lineTo(basket.x + 10, basket.y + basket.height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // إعادة ضبط التأثيرات
+      ctx.shadowBlur = 0;
+    }
+
+    // تحديث العملات
+    function updateCoins() {
+      for (let i = 0; i < coins.length; i++) {
+        const coin = coins[i];
+        
+        // تحريك العملة
+        coin.y += coin.speed;
+        
+        // رسم العملة
+        ctx.fillStyle = '#ffeb3b';
+        ctx.beginPath();
+        ctx.arc(coin.x + coin.size / 2, coin.y + coin.size / 2, coin.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // نص قيمة العملة
+        ctx.fillStyle = '#3e2723';
+        ctx.font = '14px Tajawal';
+        ctx.textAlign = 'center';
+        ctx.fillText(coin.value, coin.x + coin.size / 2, coin.y + coin.size / 2 + 5);
+        
+        // التحقق من اصطدام العملة بالسلة
+        if (checkCollision(coin, basket)) {
+          // إضافة النقاط
+          const pointValue = isDoubleScore ? coin.value * 2 : coin.value;
+          score += pointValue;
+          
+          // إنشاء تأثير النقاط المضافة
+          createPointEffect(coin.x, coin.y, pointValue);
+          
+          // حساب المجموعة المتتالية
+          const now = Date.now();
+          if (now - lastCoinTime < COMBO_TIMEOUT) {
+            comboCount++;
+            if (comboCount >= 3) {
+              createComboEffect(basket.x + basket.width / 2, basket.y);
+              score += comboCount * 2;
+              
+              // إضافة إنجاز "سيد المجموعات" إذا وصل إلى 5 مجموعات
+              if (comboCount >= 5 && !achievements.includes(ACHIEVEMENTS.COMBO_MASTER)) {
+                achievements.push(ACHIEVEMENTS.COMBO_MASTER);
+              }
+            }
+          } else {
+            comboCount = 1;
+          }
+          
+          lastCoinTime = now;
+          
+          // إضافة إنجاز "جامع العملات" إذا جمع 20 عملة
+          if (score >= 200 && !achievements.includes(ACHIEVEMENTS.COIN_COLLECTOR)) {
+            achievements.push(ACHIEVEMENTS.COIN_COLLECTOR);
+          }
+          
+          // إزالة العملة
+          coins.splice(i, 1);
+          i--;
+        }
+        
+        // إزالة العملة إذا خرجت من الشاشة
+        else if (coin.y > canvas.height) {
+          coins.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    // تحديث نقاط الخسارة
+    function updateLosePoints() {
+      for (let i = 0; i < losePoints.length; i++) {
+        const losePoint = losePoints[i];
+        
+        // تحريك نقطة الخسارة
+        losePoint.y += losePoint.speed;
+        
+        // رسم نقطة الخسارة
+        ctx.fillStyle = '#f44336';
+        ctx.beginPath();
+        ctx.rect(losePoint.x, losePoint.y, losePoint.size, losePoint.size);
+        ctx.fill();
+        
+        // نص قيمة الخسارة
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '14px Tajawal';
+        ctx.textAlign = 'center';
+        ctx.fillText(losePoint.value, losePoint.x + losePoint.size / 2, losePoint.y + losePoint.size / 2 + 5);
+        
+        // التحقق من اصطدام نقطة الخسارة بالسلة
+        if (checkCollision(losePoint, basket)) {
+          // خصم النقاط
+          score = Math.max(0, score - losePoint.value);
+          
+          // إنشاء تأثير النقاط المخصومة
+          createPointEffect(losePoint.x, losePoint.y, -losePoint.value);
+          
+          // إزالة نقطة الخسارة
+          losePoints.splice(i, 1);
+          i--;
+        }
+        
+        // إزالة نقطة الخسارة إذا خرجت من الشاشة
+        else if (losePoint.y > canvas.height) {
+          losePoints.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    // تحديث الميزات
+    function updatePowerups() {
+      for (let i = 0; i < powerups.length; i++) {
+        const powerup = powerups[i];
+        
+        // تحريك الميزة
+        powerup.y += powerup.speed;
+        
+        // رسم الميزة
+        let powerupColor = '#ffffff';
+        let powerupText = '';
+        
+        switch (powerup.type) {
+          case POWERUP_TYPES.FREEZE:
+            powerupColor = '#03a9f4';
+            powerupText = '🔵';
+            break;
+          case POWERUP_TYPES.DOUBLE_SCORE:
+            powerupColor = '#e91e63';
+            powerupText = '🔴';
+            break;
+          case POWERUP_TYPES.GOLDEN_GIFT:
+            powerupColor = '#ffc107';
+            powerupText = '⭐';
+            break;
+        }
+        
+        ctx.fillStyle = powerupColor;
+        ctx.beginPath();
+        ctx.arc(powerup.x + powerup.size / 2, powerup.y + powerup.size / 2, powerup.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // نص الميزة
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Tajawal';
+        ctx.textAlign = 'center';
+        ctx.fillText(powerupText, powerup.x + powerup.size / 2, powerup.y + powerup.size / 2 + 5);
+        
+        // التحقق من اصطدام الميزة بالسلة
+        if (checkCollision(powerup, basket)) {
+          // تطبيق تأثير الميزة
+          applyPowerupEffect(powerup);
+          
+          // إضافة إنجاز "صياد الميزات" إذا جمع 3 ميزات
+          if (!achievements.includes(ACHIEVEMENTS.POWERUP_HUNTER)) {
+            achievements.push(ACHIEVEMENTS.POWERUP_HUNTER);
+          }
+          
+          // إزالة الميزة
+          powerups.splice(i, 1);
+          i--;
+        }
+        
+        // إزالة الميزة إذا خرجت من الشاشة
+        else if (powerup.y > canvas.height) {
+          powerups.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    // تحديث الهدايا الخاصة
+    function updateSpecialGifts() {
+      for (let i = 0; i < specialGifts.length; i++) {
+        const gift = specialGifts[i];
+        
+        // تحريك الهدية
+        gift.y += gift.speed;
+        
+        // رسم الهدية
+        ctx.fillStyle = '#ff9800';
+        ctx.beginPath();
+        ctx.rect(gift.x, gift.y, gift.size, gift.size);
+        ctx.fill();
+        
+        // نص الهدية
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Tajawal';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎁', gift.x + gift.size / 2, gift.y + gift.size / 2 + 5);
+        
+        // التحقق من اصطدام الهدية بالسلة
+        if (checkCollision(gift, basket)) {
+          if (gift.type === POWERUP_TYPES.VIU_GIFT) {
+            // تطبيق تأثير هدية ViU
+            viuGiftFound = true;
+            
+            // إنشاء كود الهدية
+            const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + 
+                               Math.random().toString(36).substring(2, 6).toUpperCase();
+            giftCode.textContent = 'VIU-' + randomCode;
+            
+            // عرض نافذة الهدية
+            giftPopup.style.display = 'block';
+            
+            // إضافة نقاط إضافية
+            score += 50;
+          }
+          
+          // إزالة الهدية
+          specialGifts.splice(i, 1);
+          i--;
+        }
+        
+        // إزالة الهدية إذا خرجت من الشاشة
+        else if (gift.y > canvas.height) {
+          specialGifts.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    // تطبيق تأثير الميزة
+    function applyPowerupEffect(powerup) {
+      switch (powerup.type) {
+        case POWERUP_TYPES.FREEZE:
+          // تجميد اللاعب
+          isFrozen = true;
+          frozenEndTime = Date.now() + 5000; // 5 ثوانٍ
+          
+          // إنشاء تأثير نصي
+          createPowerupText(powerup.x, powerup.y, 'تجميد!');
+          break;
+          
+        case POWERUP_TYPES.DOUBLE_SCORE:
+          // مضاعفة النقاط
+          isDoubleScore = true;
+          doubleScoreEndTime = Date.now() + 8000; // 8 ثوانٍ
+          
+          // إنشاء تأثير نصي
+          createPowerupText(powerup.x, powerup.y, 'مضاعفة النقاط!');
+          break;
+          
+        case POWERUP_TYPES.GOLDEN_GIFT:
+          // إضافة نقاط إضافية
+          const bonusPoints = 25;
+          score += bonusPoints;
+          
+          // إنشاء تأثير نصي
+          createPowerupText(powerup.x, powerup.y, '+' + bonusPoints + ' نقطة!');
+          
+          // إضافة إنجاز "باحث الذهب"
+          if (!achievements.includes(ACHIEVEMENTS.GOLDEN_FINDER)) {
+            achievements.push(ACHIEVEMENTS.GOLDEN_FINDER);
+          }
+          break;
+      }
+      
+      // تحديث مؤشر الميزات النشطة
+      updateActiveEffects();
+    }
+
+    // إنشاء تأثير نصي للميزات
+    function createPowerupText(x, y, text) {
+      const textElement = document.createElement('div');
+      textElement.className = 'powerup-text';
+      textElement.style.left = x + 'px';
+      textElement.style.top = y + 'px';
+      textElement.textContent = text;
+      document.body.appendChild(textElement);
+      
+      // إزالة التأثير بعد انتهاء الرسوم المتحركة
+      setTimeout(() => {
+        textElement.remove();
+      }, 2000);
+    }
+
+    // إنشاء تأثير النقاط
+    function createPointEffect(x, y, points) {
+      const pointElement = document.createElement('div');
+      pointElement.className = 'powerup-text';
+      pointElement.style.left = x + 'px';
+      pointElement.style.top = y + 'px';
+      
+      if (points > 0) {
+        pointElement.textContent = '+' + points;
+        pointElement.style.color = '#4caf50';
+      } else {
+        pointElement.textContent = points;
+        pointElement.style.color = '#f44336';
+      }
+      
+      document.body.appendChild(pointElement);
+      
+      // إزالة التأثير بعد انتهاء الرسوم المتحركة
+      setTimeout(() => {
+        pointElement.remove();
+      }, 2000);
+    }
+
+    // إنشاء تأثير المجموعة
+    function createComboEffect(x, y) {
+      const comboElement = document.createElement('div');
+      comboElement.className = 'powerup-text';
+      comboElement.style.left = x + 'px';
+      comboElement.style.top = y + 'px';
+      comboElement.textContent = 'مجموعة x' + comboCount + '!';
+      comboElement.style.color = '#ff9800';
+      document.body.appendChild(comboElement);
+      
+      // إزالة التأثير بعد انتهاء الرسوم المتحركة
+      setTimeout(() => {
+        comboElement.remove();
+      }, 2000);
+    }
+
+    // تحديث مؤشر الميزات النشطة
+    function updateActiveEffects() {
+      activeEffects.innerHTML = '';
+      
+      if (isFrozen && Date.now() < frozenEndTime) {
+        const freezeIcon = document.createElement('div');
+        freezeIcon.className = 'effect-icon freeze-icon';
+        freezeIcon.textContent = '🔵 تج
